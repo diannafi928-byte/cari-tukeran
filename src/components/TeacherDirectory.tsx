@@ -120,7 +120,10 @@ export const TeacherDirectory: React.FC<TeacherDirectoryProps> = ({
     setCurrentPage(1);
   };
 
-  const sudinName = (name: string | null) => name || 'Sudin belum tersedia';
+  const sudinName = (name: string | null) =>
+    name
+      ? sudins.find((sudin) => sudin.name === name)?.abbreviation || name
+      : 'Sudin belum tersedia';
   const districtNames = (districts: Array<Pick<District, 'name'>>) =>
     districts.map((district) => district.name).join(', ');
 
