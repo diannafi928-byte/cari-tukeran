@@ -86,7 +86,7 @@ export const AboutView: React.FC = () => {
                 resmi Dinas Pendidikan DKI Jakarta.
               </p>
               <p>
-                Informasi dan hasil kecocokan yang ditampilkan hanya merupakan sarana bantu.
+                Informasi dan hasil kecocokan yang ditampilkan hanya merupakan sarana bantu,  bukan keputusan resmi terkait perpindahan atau mutasi.
                 Pengguna bertanggung jawab secara pribadi atas keputusan, komunikasi, dan tindak
                 lanjut yang dilakukan berdasarkan informasi dari sistem ini.
               </p>
