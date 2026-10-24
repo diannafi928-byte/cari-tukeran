@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../services/api';
 import { User } from '../types';
 import {
@@ -20,6 +20,7 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ currentTab, onSelectTab, onLogout }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(api.getActiveUser());
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const update = () => {
@@ -29,6 +30,23 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onSelectTab, onLogou
     const unsub = api.subscribe(update);
     return unsub;
   }, []);
+
+  useEffect(() => {
+    if (!showUserMenu) return;
+
+    const closeOnOutsideInteraction = (event: Event) => {
+      if (event.target instanceof Node && !userMenuRef.current?.contains(event.target)) {
+        setShowUserMenu(false);
+      }
+    };
+
+    document.addEventListener('pointerdown', closeOnOutsideInteraction, true);
+    document.addEventListener('click', closeOnOutsideInteraction, true);
+    return () => {
+      document.removeEventListener('pointerdown', closeOnOutsideInteraction, true);
+      document.removeEventListener('click', closeOnOutsideInteraction, true);
+    };
+  }, [showUserMenu]);
 
   const handleLogoutClick = async () => {
     setShowUserMenu(false);
@@ -120,7 +138,7 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onSelectTab, onLogou
           {/* User Account / Profile Dropdown */}
           <div className="flex items-center gap-2">
             {currentUser && (
-              <div className="relative">
+              <div className="relative" ref={userMenuRef}>
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
                   className="flex items-center gap-2.5 bg-slate-800/90 hover:bg-slate-700 text-white px-3 py-1.5 rounded-lg border border-slate-700 text-xs font-medium transition"
