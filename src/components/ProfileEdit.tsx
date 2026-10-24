@@ -480,8 +480,8 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
     return (
       <div className="page-shell">
         <main className="dashboard-main max-w-4xl py-20 text-center">
-          <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-emerald-100 shadow-xs">
-            <Loader2 className="w-7 h-7 text-emerald-600 animate-spin" />
+          <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-blue-100 shadow-xs">
+            <Loader2 className="w-7 h-7 text-blue-600 animate-spin" />
           </div>
           <h2 className="text-lg font-bold text-slate-800">Menghubungkan ke Server...</h2>
         </main>
@@ -499,13 +499,13 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
         <section className="admin-intro flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <Globe className="w-4 h-4 text-emerald-600" />
+              <Globe className="w-4 h-4 text-blue-600" />
               
             </div>
             <h1>{existingProfile ? 'Ubah Profil Mutasi' : 'Lengkapi Profil Mutasi'}</h1>
             <p>
               Data profil disimpan langsung ke server backend untuk diproses oleh algoritma
-              pencocokan dua arah Ruang Tukar Guru DKI Jakarta.
+              pencocokan dua arah Cari Tukeran Guru DKI Jakarta.
             </p>
           </div>
 
@@ -525,12 +525,12 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
           <div
             className={`mb-6 p-4 rounded-xl border flex items-center gap-3 text-xs animate-in fade-in ${
               statusNotice.type === 'success'
-                ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                ? 'bg-blue-50 border-blue-200 text-blue-900'
                 : 'bg-sky-50 border-sky-200 text-sky-900'
             }`}
           >
             {statusNotice.type === 'success' ? (
-              <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+              <CheckCircle2 className="w-5 h-5 text-blue-600 shrink-0" />
             ) : (
               <Info className="w-5 h-5 text-sky-600 shrink-0" />
             )}
@@ -540,8 +540,8 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
 
         {/* Success alert */}
         {successMsg && (
-          <div className="mb-6 bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm px-4 py-3 rounded-xl flex items-center gap-2 animate-in fade-in">
-            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+          <div className="mb-6 bg-blue-50 border border-blue-200 text-blue-800 text-sm px-4 py-3 rounded-xl flex items-center gap-2 animate-in fade-in">
+            <CheckCircle2 className="w-5 h-5 text-blue-600 shrink-0" />
             <span>{successMsg}</span>
           </div>
         )}
@@ -558,7 +558,7 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
           {/* Section 1: Identitas Guru & Kepegawaian */}
           <div className="panel p-6 shadow-xs">
             <div className="flex items-center gap-2 border-b border-slate-100 pb-3 mb-5">
-              <GraduationCap className="w-5 h-5 text-emerald-600" />
+              <GraduationCap className="w-5 h-5 text-blue-600" />
               <h3 className="text-base font-bold text-slate-800">
                 1. Identitas Guru & Kepegawaian
               </h3>
@@ -644,7 +644,7 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
           {/* Section 2: Jabatan, Jenjang & Wilayah Asal */}
           <div className="panel p-6 shadow-xs">
             <div className="flex items-center gap-2 border-b border-slate-100 pb-3 mb-5">
-              <Building className="w-5 h-5 text-emerald-600" />
+              <Building className="w-5 h-5 text-blue-600" />
               <h3 className="text-base font-bold text-slate-800">
                 2. Jabatan, Jenjang & Wilayah Asal
               </h3>
@@ -749,7 +749,7 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
                 <label htmlFor="p-vill" className="flex items-center justify-between">
                   <span>Kelurahan Asal</span>
                   {loadingVillages && (
-                    <span className="text-[11px] font-normal text-emerald-600 flex items-center gap-1">
+                    <span className="text-[11px] font-normal text-blue-600 flex items-center gap-1">
                       <Loader2 className="w-3.5 h-3.5 animate-spin" /> Memuat daftar kelurahan...
                     </span>
                   )}
@@ -785,9 +785,9 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
           </div>
 
           {/* Section 3: Preferensi Penempatan Tujuan Mutasi */}
-          <div className="panel p-6 shadow-xs border-emerald-200">
+          <div className="panel p-6 shadow-xs border-blue-200">
             <div className="flex items-center gap-2 border-b border-slate-100 pb-3 mb-5">
-              <MapPin className="w-5 h-5 text-emerald-600" />
+              <MapPin className="w-5 h-5 text-blue-600" />
               <h3 className="text-base font-bold text-slate-800">
                 3. Preferensi Tujuan Mutasi (Penempatan Baru)
               </h3>
@@ -849,8 +849,8 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
                         Semua Kecamatan ({destinationDistricts.length})
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1.5 text-[11px] bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full font-bold">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                      <span className="inline-flex items-center gap-1.5 text-[11px] bg-blue-100 text-blue-800 px-2.5 py-1 rounded-full font-bold">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
                         Terpilih: {destinationDistrictCodes.length} dari {destinationDistricts.length} Kecamatan
                       </span>
                     )}
@@ -907,7 +907,7 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
                         onClick={() => toggleDestinationDistrict(code)}
                         className={`text-left p-3 rounded-xl text-xs transition border flex items-center justify-between gap-2 cursor-pointer ${
                           isSelected
-                            ? 'bg-emerald-50 text-emerald-950 border-emerald-500 shadow-xs ring-1 ring-emerald-500/30'
+                            ? 'bg-blue-50 text-blue-950 border-blue-500 shadow-xs ring-1 ring-blue-500/30'
                             : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
                         }`}
                       >
@@ -916,7 +916,7 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
                           <div
                             className={`w-4 h-4 rounded flex items-center justify-center shrink-0 transition ${
                               isSelected
-                                ? 'bg-emerald-600 text-white'
+                                ? 'bg-blue-600 text-white'
                                 : 'border border-slate-300 bg-white'
                             }`}
                           >
@@ -924,14 +924,14 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
                           </div>
 
                           <div className="truncate">
-                            <p className={`font-semibold text-xs truncate ${isSelected ? 'text-emerald-950 font-bold' : 'text-slate-800'}`}>
+                            <p className={`font-semibold text-xs truncate ${isSelected ? 'text-blue-950 font-bold' : 'text-slate-800'}`}>
                               {d.name}
                             </p>
                           </div>
                         </div>
 
                         {isSelected && (
-                          <span className="text-[10px] bg-emerald-200/80 text-emerald-900 px-1.5 py-0.5 rounded font-bold shrink-0">
+                          <span className="text-[10px] bg-blue-200/80 text-blue-900 px-1.5 py-0.5 rounded font-bold shrink-0">
                             Aktif
                           </span>
                         )}
@@ -952,7 +952,7 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
             <button
               type="submit"
               disabled={saving}
-              className="button button-primary px-6 py-2.5 flex items-center gap-2 shadow-md bg-emerald-700 hover:bg-emerald-800 border-emerald-700"
+              className="button button-primary px-6 py-2.5 flex items-center gap-2 shadow-md bg-blue-700 hover:bg-blue-800 border-blue-700"
             >
               {saving ? (
                 <>
@@ -971,7 +971,7 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
       </main>
 
       <footer className="footer">
-        <span>Ruang Tukar Guru · Form Profil Mutasi</span>
+        <span>Cari Tukeran Guru · Form Profil Mutasi</span>
       </footer>
     </div>
   );

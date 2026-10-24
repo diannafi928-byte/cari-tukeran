@@ -1,5 +1,5 @@
 /**
- * Type definitions for Ruang Tukar Guru DKI Jakarta
+ * Type definitions for Cari Tukeran Guru DKI Jakarta
  * Conforming to API documentation API_24e1f6c8.md
  */
 
@@ -120,6 +120,29 @@ export interface ProfileInput {
   district_name: string;
   village_code: string;
   village_name: string;
+}
+
+export interface TeacherDirectoryEntry {
+  id: number;
+  name: string;
+  employment_type: EmploymentType;
+  position: Position;
+  position_label: string;
+  level: Level;
+  subject: string | null;
+  origin: {
+    sudin: string | null;
+    district: string;
+    regency: string;
+  };
+  destination: {
+    sudin: string | null;
+    position: Position;
+    position_label: string | null;
+    levels: Level[];
+    subjects: string[];
+    districts: Array<{ code: string; name: string }>;
+  };
 }
 
 export interface TwoWayMatch {

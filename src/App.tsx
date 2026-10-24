@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { api } from './services/api';
 import { Header } from './components/Header';
 import { DashboardMatches } from './components/DashboardMatches';
+import { TeacherDirectory } from './components/TeacherDirectory';
 import { ProfileEdit } from './components/ProfileEdit';
 import { AdminPanel } from './components/AdminPanel';
 import { ApiConsole } from './components/ApiConsole';
@@ -38,7 +39,7 @@ export default function App() {
   const isAuthPage = currentTab === 'login' || currentTab === 'register' || !currentUser;
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-800">
+    <div className="app-shell min-h-screen flex flex-col text-slate-800">
       {/* Navbar is strictly NOT displayed on login or register pages */}
       {!isAuthPage && (
         <Header
@@ -60,6 +61,13 @@ export default function App() {
           <RegisterView
             onSuccess={handleAuthSuccess}
             onSwitchToLogin={() => setCurrentTab('login')}
+          />
+        )}
+
+        {!isAuthPage && currentTab === 'directory' && (
+          <TeacherDirectory
+            onNavigateToProfile={() => setCurrentTab('profile')}
+            onNavigateToMatches={() => setCurrentTab('matches')}
           />
         )}
 

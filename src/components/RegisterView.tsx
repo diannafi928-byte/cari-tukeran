@@ -50,8 +50,8 @@ export const RegisterView: React.FC<RegisterViewProps> = ({ onSuccess, onSwitchT
         </div>
 
         {successMsg && (
-          <div className="mb-5 bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm px-4 py-3 rounded-lg flex items-center gap-2">
-            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+          <div className="mb-5 bg-blue-50 border border-blue-200 text-blue-800 text-sm px-4 py-3 rounded-lg flex items-center gap-2">
+            <CheckCircle2 className="w-5 h-5 text-blue-600 shrink-0" />
             <span>{successMsg}</span>
           </div>
         )}

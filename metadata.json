@@ -1,6 +1,6 @@
 {
-  "name": "Ruang Tukar Guru DKI - Aplikasi Mutasi Guru",
-  "description": "Platform pencocokan mutasi dan tukar penempatan guru antar Sudin dan sekolah di lingkungan Dinas Pendidikan Pemprov DKI Jakarta.",
+  "name": "Cari Tukeran Guru",
+  "description": "Platform untuk mencari kecocokan tukeran dan penempatan guru antar Sudin di DKI Jakarta.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

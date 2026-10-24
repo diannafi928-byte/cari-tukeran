@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { api } from '../services/api';
-import { AlertCircle, ArrowRight } from 'lucide-react';
+import { AlertCircle, ArrowRight, BookOpenCheck } from 'lucide-react';
 
 interface LoginViewProps {
   onSuccess: () => void;
@@ -35,24 +35,10 @@ export const LoginView: React.FC<LoginViewProps> = ({ onSuccess, onSwitchToRegis
       <div className="auth-card max-w-md w-full">
         {/* Brand Header */}
         <div className="text-center mb-6">
-          <div className="w-12 h-12 mx-auto rounded-xl bg-emerald-700 flex items-center justify-center text-white shadow-md mb-3">
-            <svg
-              className="w-6 h-6 text-emerald-100"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M3 8h16" />
-              <path d="m15 4 4 4-4 4" />
-              <path d="M21 16H5" />
-              <path d="m9 12-4 4 4 4" />
-            </svg>
+          <div className="brand-mark mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl text-white shadow-md">
+            <BookOpenCheck className="h-6 w-6" aria-hidden="true" />
           </div>
-          <p className="eyebrow text-emerald-800">RUANG TUKAR GURU · DKI JAKARTA</p>
+          <p className="eyebrow text-blue-800">CARI TUKERAN GURU · DKI JAKARTA</p>
           <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Masuk ke akun</h2>
           <p className="text-xs text-slate-500 mt-1">
             Gunakan email dan kata sandi Anda untuk melanjutkan.
@@ -115,7 +101,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onSuccess, onSwitchToRegis
           <button
             type="button"
             onClick={onSwitchToRegister}
-            className="auth-link text-emerald-700 hover:text-emerald-900 font-semibold cursor-pointer border-none bg-transparent"
+            className="auth-link text-blue-700 hover:text-blue-900 font-semibold cursor-pointer border-none bg-transparent"
           >
             Daftar baru
           </button>

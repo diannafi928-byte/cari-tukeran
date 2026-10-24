@@ -215,7 +215,7 @@ export const AdminPanel: React.FC = () => {
               <Shield className="w-5 h-5 text-amber-600" />
               <p className="eyebrow text-amber-600">PANEL ADMINISTRATOR</p>
             </div>
-            <h1>Kelola Sistem Ruang Tukar Guru</h1>
+            <h1>Kelola Sistem Cari Tukeran Guru</h1>
             <p>
               Operasi resmi Dinas Pendidikan DKI Jakarta: Notifikasi kecocokan, verifikasi akun,
               tinjauan penghapusan, dan manajemen master data wilayah/mapel.
@@ -227,12 +227,12 @@ export const AdminPanel: React.FC = () => {
           <div
             className={`mb-6 p-4 rounded-xl border flex items-center gap-3 text-sm animate-in fade-in ${
               msg.type === 'success'
-                ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                ? 'bg-blue-50 border-blue-200 text-blue-800'
                 : 'bg-rose-50 border-rose-200 text-rose-800'
             }`}
           >
             {msg.type === 'success' ? (
-              <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+              <CheckCircle2 className="w-5 h-5 text-blue-600 shrink-0" />
             ) : (
               <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
             )}
@@ -306,7 +306,7 @@ export const AdminPanel: React.FC = () => {
                 : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
             }`}
           >
-            <Users className="w-4 h-4 text-emerald-400" />
+            <Users className="w-4 h-4 text-blue-400" />
             <span>Pengguna ({users.length})</span>
           </button>
         </div>
@@ -659,7 +659,7 @@ export const AdminPanel: React.FC = () => {
               {/* CSV Bulk Import */}
               <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
                 <h3 className="font-bold text-slate-800 text-sm mb-1 flex items-center gap-2">
-                  <Upload className="w-4 h-4 text-emerald-600" />
+                  <Upload className="w-4 h-4 text-blue-600" />
                   <span>Impor CSV Mata Pelajaran (POST /api/admin/subjects/import)</span>
                 </h3>
                 <p className="text-[11px] text-slate-500 mb-2">
@@ -790,7 +790,7 @@ export const AdminPanel: React.FC = () => {
       </main>
 
       <footer className="footer">
-        <span>Ruang Tukar Guru · Admin Console</span>
+        <span>Cari Tukeran Guru · Admin Console</span>
         <span>Akses restricted khusus Dinas Pendidikan Provinsi DKI Jakarta</span>
       </footer>
     </div>

@@ -293,7 +293,7 @@ export const ApiConsole: React.FC = () => {
             <span className="bg-slate-800 text-slate-300 px-2 py-1 rounded">
               Abilities: [{session?.abilities.join(', ') || 'guest'}]
             </span>
-            <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-1 rounded">
+            <span className="bg-blue-500/20 text-blue-300 border border-blue-500/30 px-2 py-1 rounded">
               Role: {session?.user.role || 'Unauthenticated'}
             </span>
           </div>
@@ -313,7 +313,7 @@ export const ApiConsole: React.FC = () => {
                   const isSelected = selectedEndpointIndex === idx;
                   const methodColor =
                     ep.method === 'GET'
-                      ? 'bg-emerald-100 text-emerald-800'
+                      ? 'bg-blue-100 text-blue-800'
                       : ep.method === 'POST'
                       ? 'bg-sky-100 text-sky-800'
                       : ep.method === 'PATCH'
@@ -364,7 +364,7 @@ export const ApiConsole: React.FC = () => {
                   <span
                     className={`px-2 py-1 rounded font-mono font-bold text-xs ${
                       currentEp.method === 'GET'
-                        ? 'bg-emerald-100 text-emerald-800'
+                        ? 'bg-blue-100 text-blue-800'
                         : currentEp.method === 'POST'
                         ? 'bg-sky-100 text-sky-800'
                         : currentEp.method === 'PATCH'
@@ -404,7 +404,7 @@ export const ApiConsole: React.FC = () => {
                     rows={7}
                     value={customBody || currentEp.sampleBody || ''}
                     onChange={(e) => setCustomBody(e.target.value)}
-                    className="app-input font-mono text-xs bg-slate-900 text-emerald-400 border-slate-800"
+                    className="app-input font-mono text-xs bg-slate-900 text-blue-400 border-slate-800"
                   />
                 </div>
               )}
@@ -440,7 +440,7 @@ export const ApiConsole: React.FC = () => {
                     <span
                       className={`px-2 py-0.5 rounded text-xs font-mono font-bold ${
                         responseOutput.status >= 200 && responseOutput.status < 300
-                          ? 'bg-emerald-100 text-emerald-800'
+                          ? 'bg-blue-100 text-blue-800'
                           : responseOutput.status === 422
                           ? 'bg-amber-100 text-amber-800'
                           : 'bg-rose-100 text-rose-800'
@@ -463,7 +463,7 @@ export const ApiConsole: React.FC = () => {
               </div>
 
               {responseOutput ? (
-                <pre className="bg-slate-900 text-emerald-400 p-4 rounded-lg font-mono text-xs overflow-x-auto max-h-96 whitespace-pre leading-relaxed">
+                <pre className="bg-slate-900 text-blue-400 p-4 rounded-lg font-mono text-xs overflow-x-auto max-h-96 whitespace-pre leading-relaxed">
                   {JSON.stringify(responseOutput.data, null, 2)}
                 </pre>
               ) : (
@@ -477,7 +477,7 @@ export const ApiConsole: React.FC = () => {
       </main>
 
       <footer className="footer">
-        <span>Ruang Tukar Guru · API Documentation & Sandbox</span>
+        <span>Cari Tukeran Guru · API Documentation & Sandbox</span>
         <span>Conforms to Laravel Sanctum Bearer Auth Specifications</span>
       </footer>
     </div>

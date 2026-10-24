@@ -198,12 +198,12 @@ export const DashboardMatches: React.FC<DashboardMatchesProps> = ({ onNavigateTo
           <div
             className={`mb-6 p-4 rounded-xl border flex items-center gap-3 text-sm animate-in fade-in ${
               feedbackMsg.type === 'success'
-                ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                ? 'bg-blue-50 border-blue-200 text-blue-800'
                 : 'bg-rose-50 border-rose-200 text-rose-800'
             }`}
           >
             {feedbackMsg.type === 'success' ? (
-              <CheckCircle className="w-5 h-5 text-emerald-600 shrink-0" />
+              <CheckCircle className="w-5 h-5 text-blue-600 shrink-0" />
             ) : (
               <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0" />
             )}
@@ -249,13 +249,13 @@ export const DashboardMatches: React.FC<DashboardMatchesProps> = ({ onNavigateTo
                 <span
                   className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
                     profile.is_mutated
-                      ? 'bg-emerald-100 text-emerald-800'
+                      ? 'bg-blue-100 text-blue-800'
                       : 'bg-amber-100 text-amber-800'
                   }`}
                 >
                   <span
                     className={`w-2 h-2 rounded-full ${
-                      profile.is_mutated ? 'bg-emerald-500' : 'bg-amber-500'
+                      profile.is_mutated ? 'bg-blue-500' : 'bg-amber-500'
                     }`}
                   ></span>
                   {profile.is_mutated ? 'Sudah Mutasi (Selesai SK)' : 'Belum Mutasi (Mencari)'}
@@ -294,7 +294,7 @@ export const DashboardMatches: React.FC<DashboardMatchesProps> = ({ onNavigateTo
                       profile.deletion_request_status === 'pending'
                         ? 'text-amber-600'
                         : profile.deletion_request_status === 'approved'
-                        ? 'text-emerald-600'
+                        ? 'text-blue-600'
                         : 'text-rose-600'
                     }`}
                   >
@@ -327,7 +327,7 @@ export const DashboardMatches: React.FC<DashboardMatchesProps> = ({ onNavigateTo
             <h2 className="text-xl font-extrabold text-slate-800">
               Hasil Kecocokan ({matches.length})
             </h2>
-            <span className="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-0.5 rounded-full">
+            <span className="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded-full">
               Saling Cocok
             </span>
           </div>
@@ -382,17 +382,17 @@ export const DashboardMatches: React.FC<DashboardMatchesProps> = ({ onNavigateTo
               const partner = match.partner;
               const waNumberClean = partner.phone.replace(/[^0-9]/g, '');
               const waText = encodeURIComponent(
-                `Halo Ibu/Bapak ${partner.name}, saya ${profile.name} dari ${profile.school_name} (${profile.sudin?.name}). Saya melihat kecocokan mutasi dua arah kita di platform Ruang Tukar Guru DKI. Apakah berkenan untuk koordinasi proses tukaran ini? Terima kasih.`
+                `Halo Ibu/Bapak ${partner.name}, saya ${profile.name} dari ${profile.school_name} (${profile.sudin?.name}). Saya melihat kecocokan mutasi dua arah kita di platform Cari Tukeran Guru DKI. Apakah berkenan untuk koordinasi proses tukaran ini? Terima kasih.`
               );
               const waUrl = `https://wa.me/${waNumberClean}?text=${waText}`;
 
               return (
                 <div
                   key={match.id}
-                  className="bg-white border-2 border-emerald-500/40 rounded-2xl shadow-sm hover:shadow-md transition overflow-hidden"
+                  className="bg-white border-2 border-blue-500/40 rounded-2xl shadow-sm hover:shadow-md transition overflow-hidden"
                 >
                   {/* Top Match Banner */}
-                  <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-sky-700 px-6 py-2.5 text-white flex flex-wrap items-center justify-between gap-2">
+                  <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-700 px-6 py-2.5 text-white flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <Sparkles className="w-4 h-4 text-amber-300" />
                       <span className="font-bold text-sm tracking-wide">
@@ -467,8 +467,8 @@ export const DashboardMatches: React.FC<DashboardMatchesProps> = ({ onNavigateTo
                               <span className="font-medium text-slate-800">
                                 {partner.sudin?.abbreviation} ({partner.district_name})
                               </span>
-                              <span className="text-emerald-600 font-bold">➔</span>
-                              <span className="font-medium text-emerald-700">
+                              <span className="text-blue-600 font-bold">➔</span>
+                              <span className="font-medium text-blue-700">
                                 {partner.destinationSudin?.abbreviation} (Sekolah Anda)
                               </span>
                             </div>
@@ -477,11 +477,11 @@ export const DashboardMatches: React.FC<DashboardMatchesProps> = ({ onNavigateTo
                       </div>
 
                       {/* Column 3: Contact & Direct Action (WhatsApp / Phone) */}
-                      <div className="flex flex-col justify-between bg-emerald-50/40 border border-emerald-100 p-4 rounded-xl">
+                      <div className="flex flex-col justify-between bg-blue-50/40 border border-blue-100 p-4 rounded-xl">
                         <div>
                           <div className="flex items-center gap-2 mb-2">
-                            <Phone className="w-4 h-4 text-emerald-700" />
-                            <span className="text-xs font-bold text-emerald-950 uppercase tracking-wider">
+                            <Phone className="w-4 h-4 text-blue-700" />
+                            <span className="text-xs font-bold text-blue-950 uppercase tracking-wider">
                               Kontak Terbuka
                             </span>
                           </div>
@@ -490,9 +490,9 @@ export const DashboardMatches: React.FC<DashboardMatchesProps> = ({ onNavigateTo
                             cocok.
                           </p>
 
-                          <div className="bg-white p-3 rounded-lg border border-emerald-200 text-sm font-bold text-slate-800 tracking-wide mb-3 flex items-center justify-between">
+                          <div className="bg-white p-3 rounded-lg border border-blue-200 text-sm font-bold text-slate-800 tracking-wide mb-3 flex items-center justify-between">
                             <span>{partner.phone}</span>
-                            <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-semibold">
+                            <span className="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-semibold">
                               Aktif
                             </span>
                           </div>
@@ -528,7 +528,7 @@ export const DashboardMatches: React.FC<DashboardMatchesProps> = ({ onNavigateTo
       </main>
 
       <footer className="footer">
-        <span>Ruang Tukar Guru · Hasil Kecocokan</span>
+        <span>Cari Tukeran Guru · Hasil Kecocokan</span>
         <span>Kecocokan dihitung otomatis dua arah sesuai regulasi mutasi DKI Jakarta</span>
       </footer>
     </div>

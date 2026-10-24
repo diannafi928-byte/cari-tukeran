@@ -1,5 +1,5 @@
 /**
- * Master Data DKI Jakarta for Ruang Tukar Guru
+ * Master Data DKI Jakarta for Cari Tukeran Guru
  * Includes 11 Suku Dinas Pendidikan (Sudin) & Districts in DKI Jakarta (Province 31),
  * Official Subjects list, and Seed Users/Teachers.
  */

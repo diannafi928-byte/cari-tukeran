@@ -1,5 +1,5 @@
 /**
- * API Service for Ruang Tukar Guru DKI Jakarta
+ * API Service for Cari Tukeran Guru DKI Jakarta
  * Conforming strictly to API_24e1f6c8.md specifications.
  * Supports:
  * 1. REAL LIVE HTTP Fetch to user's Laravel backend (e.g. http://localhost:8000 or custom URL)
@@ -14,6 +14,8 @@ import {
   Subject,
   Sudin,
   TeacherProfile,
+  TeacherDirectoryEntry,
+  Position,
   TwoWayMatch,
   User,
   DeletionRequest,
@@ -765,6 +767,93 @@ class ApiService {
       return res;
     }
     return this.getMatches(candidate_origin_district_code);
+  }
+
+  public async getTeacherDirectoryAsync(): Promise<
+    ApiResponse<{
+      teachers: TeacherDirectoryEntry[];
+      position: Position | null;
+      positionLabel: string | null;
+    }>
+  > {
+    if (this.apiMode === 'live' && this.apiBaseUrl) {
+      const profileRes = await this.getProfileAsync();
+      if (profileRes.status !== 200) {
+        return { ...profileRes, data: undefined };
+      }
+
+      const position = profileRes.data?.position || null;
+      const positionLabel =
+        position === 'guru_kelas'
+          ? 'Guru Kelas'
+          : position === 'guru_mapel'
+          ? 'Guru Mata Pelajaran'
+          : null;
+
+      if (!position) {
+        return {
+          status: 200,
+          data: { teachers: [], position: null, positionLabel: null },
+          isLive: true,
+        };
+      }
+
+      const res = await this.realFetch<TeacherDirectoryEntry[]>('/api/teachers');
+      if (res.status !== 200 || !Array.isArray(res.data)) {
+        return { ...res, data: undefined };
+      }
+      return {
+        ...res,
+        data: { teachers: res.data, position, positionLabel },
+      };
+    }
+
+    const directory = this.getTeacherDirectory();
+    if (directory.status !== 200 || !directory.data) {
+      return { ...directory, data: undefined };
+    }
+
+    const maskName = (name: string) =>
+      name
+        .replace(/\S+/gu, (word) =>
+          word.length <= 2 ? '*'.repeat(word.length) : `${word[0]}${'*'.repeat(word.length - 2)}${word[word.length - 1]}`
+        )
+        .toUpperCase();
+
+    return {
+      status: 200,
+      data: {
+        position: directory.data.position as Position | null,
+        positionLabel: directory.data.positionLabel,
+        teachers: directory.data.teachers.map((teacher) => ({
+          id: teacher.id,
+          name: maskName(teacher.name),
+          employment_type: teacher.employment_type,
+          position: teacher.position,
+          position_label:
+            teacher.position === 'guru_kelas' ? 'Guru Kelas' : 'Guru Mata Pelajaran',
+          level: teacher.level,
+          subject: teacher.subject?.name || null,
+          origin: {
+            sudin: teacher.sudin?.name || null,
+            district: teacher.district_name,
+            regency: teacher.regency_name,
+          },
+          destination: {
+            sudin: teacher.destinationSudin?.name || null,
+            position: teacher.destination_position,
+            position_label:
+              teacher.destination_position === 'guru_kelas'
+                ? 'Guru Kelas'
+                : 'Guru Mata Pelajaran',
+            levels: teacher.destination_levels,
+            subjects: teacher.destinationSubjects?.map((subject) => subject.name) || [],
+            districts:
+              teacher.destinationDistricts?.map(({ code, name }) => ({ code, name })) || [],
+          },
+        })),
+      },
+    };
   }
 
   public getMatches(candidate_origin_district_code?: string): ApiResponse<TwoWayMatch[]> {
