@@ -5,9 +5,14 @@ import { AlertCircle, ArrowRight, BookOpenCheck } from 'lucide-react';
 interface LoginViewProps {
   onSuccess: () => void;
   onSwitchToRegister: () => void;
+  onSwitchToForgotPassword: () => void;
 }
 
-export const LoginView: React.FC<LoginViewProps> = ({ onSuccess, onSwitchToRegister }) => {
+export const LoginView: React.FC<LoginViewProps> = ({
+  onSuccess,
+  onSwitchToRegister,
+  onSwitchToForgotPassword,
+}) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<Record<string, string[]>>({});
@@ -81,6 +86,16 @@ export const LoginView: React.FC<LoginViewProps> = ({ onSuccess, onSwitchToRegis
               required
               placeholder="••••••••"
             />
+          </div>
+
+          <div className="-mt-2 text-right">
+            <button
+              type="button"
+              onClick={onSwitchToForgotPassword}
+              className="auth-link cursor-pointer border-none bg-transparent text-xs"
+            >
+              Lupa kata sandi?
+            </button>
           </div>
 
           <button

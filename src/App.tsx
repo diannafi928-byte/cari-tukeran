@@ -8,6 +8,7 @@ import { AdminPanel } from './components/AdminPanel';
 import { ApiConsole } from './components/ApiConsole';
 import { RegisterView } from './components/RegisterView';
 import { LoginView } from './components/LoginView';
+import { ForgotPasswordView } from './components/ForgotPasswordView';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState(api.getActiveUser());
@@ -19,7 +20,7 @@ export default function App() {
     const update = () => {
       const activeUser = api.getActiveUser();
       setCurrentUser(activeUser);
-      if (!activeUser && currentTab !== 'register') {
+      if (!activeUser && currentTab !== 'register' && currentTab !== 'forgot-password') {
         setCurrentTab('login');
       }
     };
@@ -36,7 +37,11 @@ export default function App() {
     setCurrentTab('login');
   };
 
-  const isAuthPage = currentTab === 'login' || currentTab === 'register' || !currentUser;
+  const isAuthPage =
+    currentTab === 'login' ||
+    currentTab === 'register' ||
+    currentTab === 'forgot-password' ||
+    !currentUser;
 
   return (
     <div className="app-shell min-h-screen flex flex-col text-slate-800">
@@ -54,6 +59,7 @@ export default function App() {
           <LoginView
             onSuccess={handleAuthSuccess}
             onSwitchToRegister={() => setCurrentTab('register')}
+            onSwitchToForgotPassword={() => setCurrentTab('forgot-password')}
           />
         )}
 
@@ -62,6 +68,10 @@ export default function App() {
             onSuccess={handleAuthSuccess}
             onSwitchToLogin={() => setCurrentTab('login')}
           />
+        )}
+
+        {currentTab === 'forgot-password' && (
+          <ForgotPasswordView onSwitchToLogin={() => setCurrentTab('login')} />
         )}
 
         {!isAuthPage && currentTab === 'directory' && (

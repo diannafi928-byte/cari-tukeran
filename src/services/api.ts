@@ -386,19 +386,13 @@ class ApiService {
     email: string;
     password: string;
     password_confirmation: string;
-  }): Promise<ApiResponse<{ user: User; session: AuthSession }>> {
+  }): Promise<ApiResponse<Pick<User, 'id' | 'name' | 'email'>>> {
     // If LIVE mode
     if (this.apiMode === 'live' && this.apiBaseUrl) {
-      const res = await this.realFetch<any>('/api/register', {
+      return await this.realFetch<Pick<User, 'id' | 'name' | 'email'>>('/api/register', {
         method: 'POST',
-        body: payload,
+        body: { ...payload, email: payload.email.trim().toLowerCase() },
       });
-
-      if (res.status === 201 || res.status === 200) {
-        // Auto login after register
-        return await this.login(payload.email, payload.password) as any;
-      }
-      return res;
     }
 
     // MOCK MODE
@@ -412,8 +406,8 @@ class ApiService {
     if (this.users.some((u) => u.email.toLowerCase() === payload.email.toLowerCase())) {
       errors.email = ['Alamat email sudah terdaftar.'];
     }
-    if (!payload.password || payload.password.length < 6) {
-      errors.password = ['Kata sandi minimal 6 karakter.'];
+    if (!payload.password || payload.password.length < 8) {
+      errors.password = ['Kata sandi minimal 8 karakter.'];
     }
     if (payload.password !== payload.password_confirmation) {
       errors.password_confirmation = ['Konfirmasi kata sandi tidak cocok.'];
@@ -452,8 +446,23 @@ class ApiService {
 
     return {
       status: 201,
-      data: { user: newUser, session },
+      data: newUser,
       message: 'Akun berhasil dibuat.',
+    };
+  }
+
+  public async requestPasswordReset(email: string): Promise<ApiResponse<null>> {
+    if (this.apiMode === 'live' && this.apiBaseUrl) {
+      return await this.realFetch<null>('/api/forgot-password', {
+        method: 'POST',
+        body: { email: email.trim().toLowerCase() },
+      });
+    }
+
+    return {
+      status: 503,
+      message: 'Lupa kata sandi hanya tersedia saat aplikasi terhubung ke server.',
+      errors: { general: ['Hubungkan aplikasi ke API Laravel untuk mengirim tautan reset.'] },
     };
   }
 

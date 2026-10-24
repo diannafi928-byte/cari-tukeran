@@ -15,28 +15,50 @@ export const RegisterView: React.FC<RegisterViewProps> = ({ onSuccess, onSwitchT
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
+  const [registered, setRegistered] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
     setLoading(true);
 
-    const res = await api.register({
-      name,
-      email,
-      password,
-      password_confirmation: passwordConfirmation,
-    });
+    try {
+      const res = await api.register({
+        name,
+        email,
+        password,
+        password_confirmation: passwordConfirmation,
+      });
 
-    setLoading(false);
-
-    if (res.status === 201) {
-      setSuccessMsg('Akun berhasil dibuat! Mengalihkan ke dashboard...');
-      setTimeout(() => {
-        onSuccess();
-      }, 1000);
-    } else if (res.errors) {
-      setErrors(res.errors);
+      if (res.status === 201) {
+        if (res.isLive) {
+          setSuccessMsg(
+            res.message || 'Pendaftaran berhasil. Silakan periksa email untuk verifikasi akun.'
+          );
+          setRegistered(true);
+        } else {
+          onSuccess();
+        }
+      } else {
+        const responseErrors = res.errors || {};
+        setErrors({
+          ...responseErrors,
+          ...(responseErrors.network && !responseErrors.general
+            ? { general: responseErrors.network }
+            : {}),
+          ...(Object.keys(responseErrors).length === 0
+            ? { general: [res.message || 'Pendaftaran gagal. Silakan coba lagi.'] }
+            : {}),
+        });
+      }
+    } catch (error) {
+      setErrors({
+        general: [
+          error instanceof Error ? error.message : 'Pendaftaran gagal karena terjadi kesalahan.',
+        ],
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -56,14 +78,24 @@ export const RegisterView: React.FC<RegisterViewProps> = ({ onSuccess, onSwitchT
           </div>
         )}
 
-        {errors.general && (
-          <div className="mb-5 bg-rose-50 border border-rose-200 text-rose-800 text-sm px-4 py-3 rounded-lg flex items-center gap-2">
-            <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
-            <span>{errors.general[0]}</span>
-          </div>
-        )}
+        {registered ? (
+          <button
+            type="button"
+            onClick={onSwitchToLogin}
+            className="button button-primary auth-submit"
+          >
+            Kembali ke halaman masuk
+          </button>
+        ) : (
+          <>
+            {errors.general && (
+              <div className="mb-5 bg-rose-50 border border-rose-200 text-rose-800 text-sm px-4 py-3 rounded-lg flex items-center gap-2">
+                <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
+                <span>{errors.general[0]}</span>
+              </div>
+            )}
 
-        <form onSubmit={handleSubmit} className="auth-form">
+            <form onSubmit={handleSubmit} className="auth-form">
           <div className="field">
             <label htmlFor="name">Nama lengkap</label>
             <input
@@ -107,8 +139,9 @@ export const RegisterView: React.FC<RegisterViewProps> = ({ onSuccess, onSwitchT
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              minLength={8}
               autoComplete="new-password"
-              placeholder="Minimal 6 karakter"
+              placeholder="Minimal 8 karakter"
             />
             {errors.password && <p className="field-error">{errors.password[0]}</p>}
           </div>
@@ -123,6 +156,7 @@ export const RegisterView: React.FC<RegisterViewProps> = ({ onSuccess, onSwitchT
               value={passwordConfirmation}
               onChange={(e) => setPasswordConfirmation(e.target.value)}
               required
+              minLength={8}
               autoComplete="new-password"
               placeholder="Ketik ulang kata sandi"
             />
@@ -139,18 +173,20 @@ export const RegisterView: React.FC<RegisterViewProps> = ({ onSuccess, onSwitchT
             <span>{loading ? 'Membuat akun...' : 'Buat akun'}</span>
             <span aria-hidden="true">→</span>
           </button>
-        </form>
+            </form>
 
-        <p className="auth-switch">
-          Sudah punya akun?{' '}
-          <button
-            type="button"
-            onClick={onSwitchToLogin}
-            className="auth-link cursor-pointer border-none bg-transparent"
-          >
-            Masuk
-          </button>
-        </p>
+            <p className="auth-switch">
+              Sudah punya akun?{' '}
+              <button
+                type="button"
+                onClick={onSwitchToLogin}
+                className="auth-link cursor-pointer border-none bg-transparent"
+              >
+                Masuk
+              </button>
+            </p>
+          </>
+        )}
       </div>
     </div>
   );
