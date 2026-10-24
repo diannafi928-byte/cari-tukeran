@@ -195,7 +195,7 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
         setExistingProfile(p);
         setStatusNotice({
           type: 'success',
-          text: `Data profil berhasil dimuat dari server (${p.school_name || 'Terdaftar'}).`,
+          text: `Data profil berhasil dimuat.`,
         });
 
         setName(p.name || currentUser?.name || '');
