@@ -198,10 +198,9 @@ export const TeacherDirectory: React.FC<TeacherDirectoryProps> = ({
                 >
                   <option value="">Semua Sudin asal</option>
                   {sudins.map((sudin) => (
-                    <option key={sudin.id} value={sudin.id}>
-                      {sudin.abbreviation ? `${sudin.abbreviation} · ` : ''}
-                      {sudin.name}
-                    </option>
+             <option key={sudin.id} value={sudin.id}>
+  {sudin.abbreviation || sudin.name}
+</option>
                   ))}
                 </select>
               </div>
@@ -223,8 +222,7 @@ export const TeacherDirectory: React.FC<TeacherDirectoryProps> = ({
                   <option value="">Semua Sudin tujuan</option>
                   {sudins.map((sudin) => (
                     <option key={sudin.id} value={sudin.id}>
-                      {sudin.abbreviation ? `${sudin.abbreviation} · ` : ''}
-                      {sudin.name}
+                      {sudin.abbreviation || sudin.name}
                     </option>
                   ))}
                 </select>
