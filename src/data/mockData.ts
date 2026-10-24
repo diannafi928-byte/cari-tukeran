@@ -599,7 +599,7 @@ export const INITIAL_USERS: User[] = [
   },
   {
     id: 8,
-    name: 'Hendra Gunawan, S.Kom.',
+    name: 'Hendra Gunawan',
     email: 'hendra.gunawan@guru.smk.belajar.id',
     role: 'guru',
     email_verified_at: '2026-02-10T13:00:00Z',
