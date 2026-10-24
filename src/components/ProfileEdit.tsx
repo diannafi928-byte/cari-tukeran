@@ -500,7 +500,7 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
           <div>
             <div className="flex items-center gap-2">
               <Globe className="w-4 h-4 text-blue-600" />
-              
+
             </div>
             <h1>{existingProfile ? 'Ubah Profil Mutasi' : 'Lengkapi Profil Mutasi'}</h1>
             <p>
@@ -669,7 +669,7 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
                 <label htmlFor="p-level">Jenjang Asal</label>
                 {position === 'guru_kelas' ? (
                   <div id="p-level" className="app-input flex items-center bg-slate-100 text-slate-600">
-                    SD (Sekolah Dasar) · jenjang tetap untuk Guru Kelas
+                    SD (Sekolah Dasar)
                   </div>
                 ) : (
                   <select
