@@ -38,11 +38,8 @@ export const LoginView: React.FC<LoginViewProps> = ({ onSuccess, onSwitchToRegis
           <div className="brand-mark mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl text-white shadow-md">
             <BookOpenCheck className="h-6 w-6" aria-hidden="true" />
           </div>
-          <p className="eyebrow text-blue-800">CARI TUKERAN GURU · DKI JAKARTA</p>
           <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Masuk ke akun</h2>
-          <p className="text-xs text-slate-500 mt-1">
-            Gunakan email dan kata sandi Anda untuk melanjutkan.
-          </p>
+
         </div>
 
         {/* Error notification */}
