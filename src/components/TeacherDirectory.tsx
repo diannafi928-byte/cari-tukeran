@@ -490,7 +490,7 @@ export const TeacherDirectory: React.FC<TeacherDirectoryProps> = ({
 
       <footer className="footer">
         <span>Cari Tukeran Guru · Daftar guru</span>
-        <span>Nama disamarkan untuk menjaga privasi</span>
+        <span>Aplikasi ini dibangun secara swadaya, di luar naungan resmi Dinas Pendidikan Provinsi DKI Jakarta.</span>
       </footer>
     </div>
   );
