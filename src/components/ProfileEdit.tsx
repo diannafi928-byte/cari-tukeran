@@ -503,10 +503,6 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
 
             </div>
             <h1>{existingProfile ? 'Ubah Profil Mutasi' : 'Lengkapi Profil Mutasi'}</h1>
-            <p>
-              Data profil disimpan langsung ke server backend untuk diproses oleh algoritma
-              pencocokan dua arah Cari Tukeran Guru DKI Jakarta.
-            </p>
           </div>
 
           <button
