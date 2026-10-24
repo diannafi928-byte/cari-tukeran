@@ -41,6 +41,7 @@ Respons sukses berisi `data.token`, `data.token_type`, `data.abilities`, dan `da
 | `DELETE` | `/api/logout` | Cabut token Bearer yang sedang dipakai. |
 | `GET` | `/api/sudins` | Daftar Sudin untuk guru. |
 | `GET` | `/api/sudins/{sudin}/districts` | Daftar kecamatan dalam Sudin. |
+| `GET` | `/api/subjects` | Daftar mata pelajaran untuk pilihan pada profil guru. |
 | `GET` | `/api/profile` | Profil guru saat ini; `data` bernilai `null` jika belum ada. |
 | `POST` | `/api/profile` | Membuat atau memperbarui profil. Batas 10 permintaan per menit. |
 | `GET` | `/api/matches` | Daftar calon tukeran yang cocok dua arah. Batas 30 permintaan per menit. |
@@ -55,16 +56,13 @@ Respons sukses berisi `data.token`, `data.token_type`, `data.abilities`, dan `da
 | --- | --- |
 | `name` | string, 2–120 karakter |
 | `phone` | string, 8–24 karakter; hanya angka, spasi, `+`, `()`, titik, dan tanda hubung |
-| `employment_type` | `PNS`, `PPPK`, atau `KKI` |
+| `employment_type` | `PNS` |
 | `school_name` | string, maksimal 160 karakter |
 | `school_address` | string, maksimal 1000 karakter |
 | `sudin_id` | ID Sudin asal |
 | `position` | `guru_kelas` atau `guru_mapel` |
-| `level` | `SD`, `SMP`, `SMA`, atau `SMK` |
+| `level` | `SD`, `SMP`, `SMA`, atau `SMK`; harus `SD` jika `position` adalah `guru_kelas` |
 | `subject_id` | opsional; wajib jika `position` adalah `guru_mapel` |
-| `destination_position` | `guru_kelas` atau `guru_mapel` |
-| `destination_levels` | array jenjang tujuan; wajib, minimal satu. Untuk `guru_kelas`, tepat satu jenjang |
-| `destination_subject_ids` | opsional; minimal satu ID jika posisi tujuan `guru_mapel` |
 | `destination_sudin_id` | ID Sudin tujuan |
 | `destination_district_codes` | opsional; array kode kecamatan tujuan. Kosong/tidak dikirim berarti semua kecamatan dalam Sudin tujuan |
 | `province_code` | harus `31` (DKI Jakarta) |
@@ -72,7 +70,7 @@ Respons sukses berisi `data.token`, `data.token_type`, `data.abilities`, dan `da
 | `district_code`, `district_name` | kode dan nama kecamatan asal |
 | `village_code`, `village_name` | kode dan nama kelurahan asal |
 
-Kode wilayah harus sesuai hierarki DKI Jakarta, kecamatan asal harus berada dalam Sudin asal, dan setiap kecamatan tujuan harus berada dalam Sudin tujuan. Nomor telepon disimpan dalam format `+62...`.
+Jabatan dan jenjang tujuan otomatis mengikuti jabatan dan jenjang asal. Jika jabatan asal `guru_mapel`, mapel tujuan juga otomatis mengikuti mapel asal. Klien tidak perlu mengirim field tujuan tersebut. Kecamatan asal harus berada dalam Sudin asal, dan setiap kecamatan tujuan harus berada dalam Sudin tujuan. Nomor telepon disimpan dalam format `+62...`.
 
 ```json
 {
@@ -84,8 +82,6 @@ Kode wilayah harus sesuai hierarki DKI Jakarta, kecamatan asal harus berada dala
   "sudin_id": 1,
   "position": "guru_kelas",
   "level": "SD",
-  "destination_position": "guru_kelas",
-  "destination_levels": ["SD"],
   "destination_sudin_id": 2,
   "destination_district_codes": ["31.75.07"],
   "province_code": "31",
@@ -98,7 +94,7 @@ Kode wilayah harus sesuai hierarki DKI Jakarta, kecamatan asal harus berada dala
 }
 ```
 
-Profil baru mengembalikan `201 Created`; pembaruan mengembalikan `200 OK`. Data profil menyertakan relasi Sudin, kecamatan tujuan, jenjang, dan mapel terkait.
+Profil baru mengembalikan `201 Created`; pembaruan mengembalikan `200 OK`. `employment_type` selain `PNS` ditolak dengan `422`. Data profil menyertakan relasi Sudin, kecamatan tujuan, jenjang, dan mapel terkait.
 
 ### Mencari kecocokan
 

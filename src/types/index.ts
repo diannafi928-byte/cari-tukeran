@@ -111,9 +111,6 @@ export interface ProfileInput {
   position: Position;
   level: Level;
   subject_id?: number | null;
-  destination_position: Position;
-  destination_levels: Level[];
-  destination_subject_ids?: number[];
   destination_sudin_id: number;
   destination_district_codes?: string[];
   province_code: '31';

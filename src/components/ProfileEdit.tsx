@@ -28,7 +28,7 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
   // Form State
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
-  const [employmentType, setEmploymentType] = useState<'PNS' | 'PPPK' | 'KKI'>('PNS');
+  const [employmentType, setEmploymentType] = useState<'PNS'>('PNS');
   const [schoolName, setSchoolName] = useState('');
   const [schoolAddress, setSchoolAddress] = useState('');
 
@@ -43,9 +43,6 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
 
   // Destination State
   const [destinationSudinId, setDestinationSudinId] = useState<number>(2);
-  const [destinationPosition, setDestinationPosition] = useState<Position>('guru_kelas');
-  const [destinationLevels, setDestinationLevels] = useState<Level[]>(['SD']);
-  const [destinationSubjectIds, setDestinationSubjectIds] = useState<number[]>([]);
   const [destinationDistrictCodes, setDestinationDistrictCodes] = useState<string[]>([]);
 
   // Districts and Villages for current origin and destination
@@ -213,39 +210,15 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
         const curVillageCode = p.village_code || '';
         const curVillageName = p.village_name || '';
 
-        setPosition(p.position || 'guru_kelas');
-        setLevel(p.level || 'SD');
+        const profilePosition = p.position || 'guru_kelas';
+        setPosition(profilePosition);
+        setLevel(profilePosition === 'guru_kelas' ? 'SD' : p.level || 'SD');
         setSubjectId(p.subject_id ? Number(p.subject_id) : '');
 
         const curDestSudinId =
           Number(p.destination_sudin_id) ||
           (loadedSudins[1]?.id ?? loadedSudins[0]?.id ?? 0);
         setDestinationSudinId(curDestSudinId);
-        setDestinationPosition(p.destination_position || 'guru_kelas');
-
-        // Normalize destination levels (handles ["SD"] or [{ level: "SD" }])
-        let parsedLevels: Level[] = ['SD'];
-        if (Array.isArray(p.destination_levels)) {
-          parsedLevels = p.destination_levels.map((item: any) =>
-            typeof item === 'string' ? item : item.level
-          );
-        } else if (Array.isArray(p.destinationLevels)) {
-          parsedLevels = p.destinationLevels.map((item: any) => item.level);
-        }
-        setDestinationLevels(
-          p.destination_position === 'guru_kelas' ? ['SD'] : parsedLevels.length > 0 ? parsedLevels : ['SD']
-        );
-
-        // Normalize destination subjects
-        let parsedSubjectIds: number[] = [];
-        if (Array.isArray(p.destination_subject_ids)) {
-          parsedSubjectIds = p.destination_subject_ids.map((id: any) => Number(id));
-        } else if (Array.isArray(p.destinationSubjects)) {
-          parsedSubjectIds = p.destinationSubjects.map((s: any) => Number(s.id));
-        } else if (Array.isArray(p.destination_subjects)) {
-          parsedSubjectIds = p.destination_subjects.map((s: any) => Number(s.id));
-        }
-        setDestinationSubjectIds(parsedSubjectIds);
 
         // Normalize destination districts (strictly clean codes)
         let parsedDistrictCodes: string[] = [];
@@ -371,6 +344,14 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
     }
   };
 
+  const handlePositionChange = (newPosition: Position) => {
+    setPosition(newPosition);
+    if (newPosition === 'guru_kelas') {
+      setLevel('SD');
+      setSubjectId('');
+    }
+  };
+
   const handleDestinationSudinChange = async (newSudinId: number) => {
     setDestinationSudinId(newSudinId);
     setDestinationDistrictCodes([]); // reset destination districts filter
@@ -380,28 +361,6 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
     } else {
       setDestinationDistricts([]);
       setErrors({ general: [res.message || 'Gagal memuat kecamatan tujuan dari server.'] });
-    }
-  };
-
-  const toggleDestinationLevel = (lvl: Level) => {
-    if (destinationPosition === 'guru_kelas') {
-      setDestinationLevels(['SD']);
-    } else {
-      if (destinationLevels.includes(lvl)) {
-        if (destinationLevels.length > 1) {
-          setDestinationLevels(destinationLevels.filter((l) => l !== lvl));
-        }
-      } else {
-        setDestinationLevels([...destinationLevels, lvl]);
-      }
-    }
-  };
-
-  const toggleDestinationSubject = (subId: number) => {
-    if (destinationSubjectIds.includes(subId)) {
-      setDestinationSubjectIds(destinationSubjectIds.filter((id) => id !== subId));
-    } else {
-      setDestinationSubjectIds([...destinationSubjectIds, subId]);
     }
   };
 
@@ -447,20 +406,25 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
     if (!selectedVillage) {
       validationErrors.village_code = ['Pilih kelurahan asal dari daftar server.'];
     }
-    if (destinationLevels.length === 0) {
-      validationErrors.destination_levels = ['Pilih setidaknya satu jenjang tujuan.'];
+    if (position === 'guru_kelas' && level !== 'SD') {
+      validationErrors.level = ['Untuk Guru Kelas, jenjang yang dapat dipilih hanya SD.'];
     }
     if (position === 'guru_mapel' && subjectId === '') {
       validationErrors.subject_id = ['Pilih mata pelajaran asal.'];
     }
-    if (position === 'guru_mapel' && subjects.length === 0 && errors.subjects) {
-      validationErrors.subjects = errors.subjects;
+    if (
+      position === 'guru_mapel' &&
+      subjects.length === 0
+    ) {
+      validationErrors.subjects =
+        errors.subjects || ['Daftar mata pelajaran tidak tersedia dari server.'];
     }
-    if (destinationPosition === 'guru_mapel' && destinationSubjectIds.length === 0) {
-      validationErrors.destination_subject_ids = ['Pilih setidaknya satu mata pelajaran tujuan.'];
-    }
-    if (destinationPosition === 'guru_mapel' && subjects.length === 0 && errors.subjects) {
-      validationErrors.subjects = errors.subjects;
+    if (
+      position === 'guru_mapel' &&
+      subjectId !== '' &&
+      !subjects.some((subject) => subject.id === Number(subjectId))
+    ) {
+      validationErrors.subject_id = ['Pilih mata pelajaran dari daftar server.'];
     }
 
     if (Object.keys(validationErrors).length > 0) {
@@ -483,11 +447,6 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
       position,
       level,
       ...(position === 'guru_mapel' && subjectId !== '' ? { subject_id: Number(subjectId) } : {}),
-      destination_position: destinationPosition,
-      destination_levels: destinationPosition === 'guru_kelas' ? ['SD'] : destinationLevels,
-      ...(destinationPosition === 'guru_mapel' && destinationSubjectIds.length > 0
-        ? { destination_subject_ids: destinationSubjectIds }
-        : {}),
       destination_sudin_id: Number(destinationSudinId),
       ...(destinationDistrictCodes.length > 0
         ? { destination_district_codes: destinationDistrictCodes }
@@ -640,12 +599,10 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
                 <select
                   id="p-emp"
                   value={employmentType}
-                  onChange={(e) => setEmploymentType(e.target.value as any)}
+                  onChange={(e) => setEmploymentType(e.target.value as 'PNS')}
                   className="app-input"
                 >
                   <option value="PNS">PNS (Pegawai Negeri Sipil)</option>
-                  <option value="PPPK">PPPK (Pegawai Pemerintah Perjanjian Kerja)</option>
-                  <option value="KKI">KKI (Kontrak Kerja Individu Pemprov DKI)</option>
                 </select>
                 {errors.employment_type && (
                   <p className="field-error">{errors.employment_type[0]}</p>
@@ -699,7 +656,7 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
                 <select
                   id="p-pos"
                   value={position}
-                  onChange={(e) => setPosition(e.target.value as Position)}
+                  onChange={(e) => handlePositionChange(e.target.value as Position)}
                   className="app-input"
                 >
                   <option value="guru_kelas">Guru Kelas</option>
@@ -710,17 +667,23 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
 
               <div className="field">
                 <label htmlFor="p-level">Jenjang Asal</label>
-                <select
-                  id="p-level"
-                  value={level}
-                  onChange={(e) => setLevel(e.target.value as Level)}
-                  className="app-input"
-                >
-                  <option value="SD">SD (Sekolah Dasar)</option>
-                  <option value="SMP">SMP (Sekolah Menengah Pertama)</option>
-                  <option value="SMA">SMA (Sekolah Menengah Atas)</option>
-                  <option value="SMK">SMK (Sekolah Menengah Kejuruan)</option>
-                </select>
+                {position === 'guru_kelas' ? (
+                  <div id="p-level" className="app-input flex items-center bg-slate-100 text-slate-600">
+                    SD (Sekolah Dasar) · jenjang tetap untuk Guru Kelas
+                  </div>
+                ) : (
+                  <select
+                    id="p-level"
+                    value={level}
+                    onChange={(e) => setLevel(e.target.value as Level)}
+                    className="app-input"
+                  >
+                    <option value="SD">SD (Sekolah Dasar)</option>
+                    <option value="SMP">SMP (Sekolah Menengah Pertama)</option>
+                    <option value="SMA">SMA (Sekolah Menengah Atas)</option>
+                    <option value="SMK">SMK (Sekolah Menengah Kejuruan)</option>
+                  </select>
+                )}
                 {errors.level && <p className="field-error">{errors.level[0]}</p>}
               </div>
 
@@ -854,104 +817,17 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
                   )}
                 </div>
 
-                <div className="field">
-                  <label htmlFor="p-dest-pos">Jabatan Tujuan</label>
-                  <select
-                    id="p-dest-pos"
-                    value={destinationPosition}
-                    onChange={(e) => {
-                      const pos = e.target.value as Position;
-                      setDestinationPosition(pos);
-                      if (pos === 'guru_kelas') {
-                        setDestinationLevels(['SD']);
-                      }
-                    }}
-                    className="app-input"
-                  >
-                    <option value="guru_kelas">Guru Kelas</option>
-                    <option value="guru_mapel">Guru Mata Pelajaran</option>
-                  </select>
-                  {errors.destination_position && (
-                    <p className="field-error">{errors.destination_position[0]}</p>
-                  )}
-                </div>
               </div>
 
-              {/* Destination Levels */}
-              <div>
-                <label className="text-xs font-semibold text-slate-700 block mb-2">
-                  Jenjang Tujuan yang Diterima{' '}
-                  <span className="text-slate-400 font-normal">
-                    {destinationPosition === 'guru_kelas'
-                      ? '(Untuk Guru Kelas: wajib jenjang SD)'
-                      : '(Untuk Guru Mapel: dapat memilih satu atau beberapa jenjang)'}
-                  </span>
-                </label>
-
-                {destinationPosition === 'guru_kelas' ? (
-                  <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300 shadow-xs">
-                    <Check className="w-4 h-4 text-emerald-600" />
-                    <span>SD (Sekolah Dasar) — Wajib untuk Guru Kelas sesuai ketentuan Disdik DKI</span>
-                  </div>
-                ) : (
-                  <div className="flex flex-wrap gap-2">
-                    {(['SD', 'SMP', 'SMA', 'SMK'] as Level[]).map((lvl) => {
-                      const isSelected = destinationLevels.includes(lvl);
-                      return (
-                        <button
-                          key={`dest-lvl-${lvl}`}
-                          type="button"
-                          onClick={() => toggleDestinationLevel(lvl)}
-                          className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold border transition ${
-                            isSelected
-                              ? 'bg-emerald-700 text-white border-emerald-700 shadow-xs'
-                              : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
-                          }`}
-                        >
-                          {lvl}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-                {errors.destination_levels && (
-                  <p className="field-error mt-1">{errors.destination_levels[0]}</p>
-                )}
+              <div className="rounded-xl border border-sky-200 bg-sky-50 p-4 text-xs text-sky-950">
+                <p className="font-semibold">Jabatan, jenjang, dan mapel tujuan mengikuti data asal</p>
+                <p className="mt-1 text-sky-800">
+                  {position === 'guru_kelas' ? 'Guru Kelas · SD' : 'Guru Mapel'} · {level}
+                  {position === 'guru_mapel' && subjectId !== ''
+                    ? ` · ${subjects.find((subject) => subject.id === Number(subjectId))?.name || 'Mapel terpilih'}`
+                    : ''}
+                </p>
               </div>
-
-              {/* Destination Subjects (if destination position is guru_mapel) */}
-              {destinationPosition === 'guru_mapel' && (
-                <div>
-                  <label className="text-xs font-semibold text-slate-700 block mb-2">
-                    Mata Pelajaran Tujuan (Pilih satu atau lebih):
-                  </label>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 max-h-48 overflow-y-auto p-2 border border-slate-200 rounded-lg bg-slate-50">
-                    {subjects.map((sub) => {
-                      const isSelected = destinationSubjectIds.includes(sub.id);
-                      return (
-                        <button
-                          key={`dest-sub-${sub.id}`}
-                          type="button"
-                          onClick={() => toggleDestinationSubject(sub.id)}
-                          className={`text-left p-2 rounded text-xs transition border ${
-                            isSelected
-                              ? 'bg-emerald-100 text-emerald-950 border-emerald-400 font-bold'
-                              : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
-                          }`}
-                        >
-                          {sub.name}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  {errors.destination_subject_ids && (
-                    <p className="field-error mt-1">{errors.destination_subject_ids[0]}</p>
-                  )}
-                  {errors.subjects && (
-                    <p className="field-error mt-1">{errors.subjects[0]}</p>
-                  )}
-                </div>
-              )}
 
               {/* Destination Districts Multi-Select Section */}
               <div className="bg-slate-50/80 p-4 rounded-xl border border-slate-200">

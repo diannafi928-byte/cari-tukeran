@@ -559,7 +559,9 @@ class ApiService {
 
   public async getSubjectsAsync(): Promise<ApiResponse<Subject[]>> {
     if (this.apiMode === 'live' && this.apiBaseUrl) {
-      const res = await this.realFetch<Subject[]>('/api/admin/subjects');
+      const endpoint =
+        this.getActiveUser()?.role === 'admin' ? '/api/admin/subjects' : '/api/subjects';
+      const res = await this.realFetch<Subject[]>(endpoint);
       if (res.status === 200 && Array.isArray(res.data)) {
         this.subjects = res.data;
         return res;
@@ -651,15 +653,8 @@ class ApiService {
       errors.subject_id = ['Mata pelajaran wajib dipilih untuk jabatan guru_mapel.'];
     }
 
-    if (input.destination_position === 'guru_kelas' && input.destination_levels?.length !== 1) {
-      errors.destination_levels = ['Untuk guru_kelas, tepat satu jenjang tujuan yang harus dipilih.'];
-    }
-
-    if (
-      input.destination_position === 'guru_mapel' &&
-      (!input.destination_subject_ids || input.destination_subject_ids.length === 0)
-    ) {
-      errors.destination_subject_ids = ['Minimal satu mata pelajaran tujuan untuk guru_mapel.'];
+    if (input.position === 'guru_kelas' && input.level !== 'SD') {
+      errors.level = ['Untuk guru_kelas, jenjang yang dapat dipilih hanya SD.'];
     }
 
     const destSudin = this.sudins.find((s) => s.id === Number(input.destination_sudin_id));
@@ -722,9 +717,12 @@ class ApiService {
       village_code: input.village_code,
       village_name: input.village_name,
       destination_sudin_id: Number(input.destination_sudin_id),
-      destination_position: input.destination_position,
-      destination_levels: input.destination_levels,
-      destination_subject_ids: input.destination_subject_ids?.map((id) => Number(id)) || [],
+      destination_position: input.position,
+      destination_levels: [input.level],
+      destination_subject_ids:
+        input.position === 'guru_mapel' && input.subject_id
+          ? [Number(input.subject_id)]
+          : [],
       destination_district_codes: input.destination_district_codes || [],
       is_mutated: isNew ? false : this.profiles[existingIndex].is_mutated,
       deletion_request_status: isNew ? null : this.profiles[existingIndex].deletion_request_status,
@@ -817,12 +815,18 @@ class ApiService {
 
       if (myProfile.position === 'guru_mapel') {
         if (!myProfile.subject_id) continue;
-        if (!candidate.destination_subject_ids?.includes(myProfile.subject_id)) continue;
+        if (
+          !candidate.destination_subject_ids?.includes(myProfile.subject_id) &&
+          candidate.subject_id !== myProfile.subject_id
+        ) continue;
       }
 
       if (candidate.position === 'guru_mapel') {
         if (!candidate.subject_id) continue;
-        if (!myProfile.destination_subject_ids?.includes(candidate.subject_id)) continue;
+        if (
+          !myProfile.destination_subject_ids?.includes(candidate.subject_id) &&
+          myProfile.subject_id !== candidate.subject_id
+        ) continue;
       }
 
       let myDistrictSatisfied = true;
