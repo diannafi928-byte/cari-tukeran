@@ -9,6 +9,7 @@ import { ApiConsole } from './components/ApiConsole';
 import { RegisterView } from './components/RegisterView';
 import { LoginView } from './components/LoginView';
 import { ForgotPasswordView } from './components/ForgotPasswordView';
+import { AboutView } from './components/AboutView';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState(api.getActiveUser());
@@ -88,6 +89,8 @@ export default function App() {
         {!isAuthPage && currentTab === 'profile' && (
           <ProfileEdit onSaved={() => setCurrentTab('matches')} />
         )}
+
+        {!isAuthPage && currentTab === 'about' && <AboutView />}
 
         {!isAuthPage && currentTab === 'admin' && <AdminPanel />}
 

@@ -5,6 +5,7 @@ import {
   ArrowLeftRight,
   BookOpenCheck,
   ContactRound,
+  Info,
   GraduationCap,
   Shield,
   LogOut,
@@ -118,6 +119,18 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onSelectTab, onLogou
               <span>Profil Mutasi</span>
             </button>
 
+            <button
+              onClick={() => onSelectTab('about')}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-md transition ${
+                currentTab === 'about'
+                  ? 'bg-slate-800 text-blue-400 font-semibold'
+                  : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+              }`}
+            >
+              <Info className="w-4 h-4" />
+              <span>Tentang</span>
+            </button>
+
             {currentUser?.role === 'admin' && (
               <button
                 onClick={() => onSelectTab('admin')}
@@ -224,6 +237,15 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onSelectTab, onLogou
         >
           <ContactRound className="w-4 h-4" />
           <span>Profil</span>
+        </button>
+        <button
+          onClick={() => onSelectTab('about')}
+          className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded ${
+            currentTab === 'about' ? 'text-blue-400 font-bold' : 'text-slate-400'
+          }`}
+        >
+          <Info className="w-4 h-4" />
+          <span>Tentang</span>
         </button>
         {currentUser?.role === 'admin' && (
           <button
