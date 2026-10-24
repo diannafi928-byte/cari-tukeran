@@ -9,6 +9,7 @@
 import {
   AuthSession,
   District,
+  Level,
   ProfileInput,
   Subject,
   Sudin,
@@ -272,6 +273,39 @@ class ApiService {
     });
   }
 
+  private normalizeTeacherProfile(profile: TeacherProfile): TeacherProfile {
+    const rawProfile = profile as TeacherProfile & {
+      destination_sudin?: Sudin;
+      destination_subjects?: Subject[];
+      destination_districts?: District[];
+    };
+    const levels = (Array.isArray(profile.destination_levels)
+      ? (profile.destination_levels as unknown[])
+      : [])
+      .map((item) => {
+        const value =
+          typeof item === 'string'
+            ? item
+            : item && typeof item === 'object' && 'level' in item
+            ? item.level
+            : null;
+        return ['SD', 'SMP', 'SMA', 'SMK'].includes(String(value)) ? (value as Level) : null;
+      })
+      .filter((level): level is Level => level !== null);
+    const destinationLevels =
+      profile.destinationLevels?.length
+        ? profile.destinationLevels
+        : levels.map((level) => ({ level }));
+
+    return {
+      ...profile,
+      destinationSudin: profile.destinationSudin ?? rawProfile.destination_sudin,
+      destinationLevels,
+      destinationSubjects: profile.destinationSubjects ?? rawProfile.destination_subjects,
+      destinationDistricts: profile.destinationDistricts ?? rawProfile.destination_districts,
+    };
+  }
+
   // ---------------- AUTH METHODS ----------------
 
   public getCurrentSession(): AuthSession | null {
@@ -452,10 +486,11 @@ class ApiService {
   public async getSudinsAsync(): Promise<ApiResponse<Sudin[]>> {
     if (this.apiMode === 'live' && this.apiBaseUrl) {
       const res = await this.realFetch<Sudin[]>('/api/sudins');
-      if (res.status === 200 && res.data) {
+      if (res.status === 200 && Array.isArray(res.data)) {
         this.sudins = res.data;
         return res;
       }
+      return res;
     }
     return { status: 200, data: this.sudins };
   }
@@ -473,23 +508,18 @@ class ApiService {
 
   public async getDistrictsBySudin(sudinId: number): Promise<ApiResponse<District[]>> {
     if (this.apiMode === 'live' && this.apiBaseUrl) {
-      try {
-        const res = await this.realFetch<any[]>(`/api/sudins/${sudinId}/districts`);
-        if (res.status === 200 && Array.isArray(res.data) && res.data.length > 0) {
-          const normalized: District[] = res.data.map((d: any) => ({
-            code: String(d.code || d.district_code || d.id || '').trim(),
-            name: String(d.name || d.district_name || d.nama || d.code || '').trim(),
-            regency_code: String(d.regency_code || d.kode_kabupaten || '31').trim(),
-            regency_name: String(d.regency_name || d.nama_kabupaten || 'Kota Administrasi').trim(),
-          }));
-          return {
-            ...res,
-            data: normalized,
-          };
-        }
-      } catch (err) {
-        console.warn('Live getDistrictsBySudin error, using local fallback:', err);
+      const res = await this.realFetch<any[]>(`/api/sudins/${sudinId}/districts`);
+      if (res.status !== 200 || !Array.isArray(res.data)) {
+        return res;
       }
+
+      const normalized: District[] = res.data.map((d: any) => ({
+        code: String(d.code || d.district_code || d.id || '').trim(),
+        name: String(d.name || d.district_name || d.nama || '').trim(),
+        regency_code: String(d.regency_code || d.kode_kabupaten || '').trim(),
+        regency_name: String(d.regency_name || d.nama_kabupaten || '').trim(),
+      }));
+      return { ...res, data: normalized };
     }
 
     const sudin =
@@ -506,33 +536,19 @@ class ApiService {
 
   public async getVillagesByDistrict(sudinId: number, districtCode: string): Promise<ApiResponse<Village[]>> {
     if (this.apiMode === 'live' && this.apiBaseUrl) {
-      try {
-        const res = await this.realFetch<any[]>(`/api/sudins/${sudinId}/districts/${districtCode}/villages`);
-        if (res.status === 200 && Array.isArray(res.data) && res.data.length > 0) {
-          const normalized: Village[] = res.data.map((v: any) => ({
-            code: String(v.code || v.village_code || v.id || '').trim(),
-            name: String(v.name || v.village_name || v.nama || v.code || '').trim(),
-            district_code: districtCode,
-          }));
-          return {
-            ...res,
-            data: normalized,
-          };
-        }
-        // Fallback gracefully on 502 or empty data
-        const fallback = findVillagesByDistrict(districtCode);
-        return {
-          status: 200,
-          data: fallback,
-          isLive: false,
-        };
-      } catch {
-        return {
-          status: 200,
-          data: findVillagesByDistrict(districtCode),
-          isLive: false,
-        };
+      const res = await this.realFetch<any[]>(
+        `/api/sudins/${sudinId}/districts/${encodeURIComponent(districtCode)}/villages`
+      );
+      if (res.status !== 200 || !Array.isArray(res.data)) {
+        return res;
       }
+
+      const normalized: Village[] = res.data.map((v: any) => ({
+        code: String(v.code || v.village_code || v.id || '').trim(),
+        name: String(v.name || v.village_name || v.nama || '').trim(),
+        district_code: districtCode,
+      }));
+      return { ...res, data: normalized };
     }
 
     return {
@@ -544,10 +560,11 @@ class ApiService {
   public async getSubjectsAsync(): Promise<ApiResponse<Subject[]>> {
     if (this.apiMode === 'live' && this.apiBaseUrl) {
       const res = await this.realFetch<Subject[]>('/api/admin/subjects');
-      if (res.status === 200 && res.data) {
+      if (res.status === 200 && Array.isArray(res.data)) {
         this.subjects = res.data;
         return res;
       }
+      return res;
     }
     return { status: 200, data: this.subjects };
   }
@@ -565,6 +582,9 @@ class ApiService {
   public async getProfileAsync(): Promise<ApiResponse<TeacherProfile | null>> {
     if (this.apiMode === 'live' && this.apiBaseUrl) {
       const res = await this.realFetch<TeacherProfile | null>('/api/profile');
+      if (res.status === 200 && res.data) {
+        return { ...res, data: this.normalizeTeacherProfile(res.data) };
+      }
       return res;
     }
     return this.getProfile();
@@ -585,10 +605,14 @@ class ApiService {
 
   public async saveProfile(input: ProfileInput): Promise<ApiResponse<TeacherProfile>> {
     if (this.apiMode === 'live' && this.apiBaseUrl) {
-      return await this.realFetch<TeacherProfile>('/api/profile', {
+      const res = await this.realFetch<TeacherProfile>('/api/profile', {
         method: 'POST',
         body: input,
       });
+      if ((res.status === 200 || res.status === 201) && res.data) {
+        return { ...res, data: this.normalizeTeacherProfile(res.data) };
+      }
+      return res;
     }
 
     const user = this.getActiveUser();
@@ -730,7 +754,17 @@ class ApiService {
       const q = candidate_origin_district_code
         ? `?candidate_origin_district_code=${encodeURIComponent(candidate_origin_district_code)}`
         : '';
-      return await this.realFetch<TwoWayMatch[]>(`/api/matches${q}`);
+      const res = await this.realFetch<TwoWayMatch[]>(`/api/matches${q}`);
+      if (res.status === 200 && Array.isArray(res.data)) {
+        return {
+          ...res,
+          data: res.data.map((match) => ({
+            ...match,
+            partner: this.normalizeTeacherProfile(match.partner),
+          })),
+        };
+      }
+      return res;
     }
     return this.getMatches(candidate_origin_district_code);
   }

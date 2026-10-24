@@ -83,12 +83,17 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
         const name = getDistrictName(item);
         return {
           code,
-          name: name || code,
-          regency_code: String(item.regency_code || item.kode_kabupaten || '31'),
-          regency_name: String(item.regency_name || item.nama_kabupaten || 'Kota Administrasi'),
+          name,
+          regency_code: String(item.regency_code || item.kode_kabupaten || ''),
+          regency_name: String(item.regency_name || item.nama_kabupaten || ''),
         };
       })
-      .filter((d) => Boolean(d.code) && d.code !== 'undefined' && d.code !== 'null');
+      .filter(
+        (d) =>
+          Boolean(d.code && d.name) &&
+          d.code !== 'undefined' &&
+          d.code !== 'null'
+      );
   };
 
   // Helper to load villages for a Sudin and District
@@ -107,14 +112,17 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
     setLoadingVillages(true);
     try {
       const res = await api.getVillagesByDistrict(sId, dCode);
-      const rawList = res.data || [];
+      if (res.status !== 200 || !Array.isArray(res.data)) {
+        throw new Error(res.message || 'Gagal memuat daftar kelurahan dari server.');
+      }
+      const rawList = res.data;
       const list: Village[] = rawList
         .map((v: any) => ({
           code: String(v.code || v.village_code || v.id || '').trim(),
-          name: String(v.name || v.village_name || v.nama || v.code || '').trim(),
+          name: String(v.name || v.village_name || v.nama || '').trim(),
           district_code: dCode,
         }))
-        .filter((v: Village) => Boolean(v.code));
+        .filter((v: Village) => Boolean(v.code && v.name));
       setOriginVillages(list);
       if (list.length > 0) {
         const matched = targetVillageCode
@@ -122,16 +130,24 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
           : targetVillageName
           ? list.find((v) => v.name.toLowerCase() === targetVillageName.toLowerCase())
           : null;
-        const selected = matched || list[0];
-        setVillageCode(selected.code);
-        setVillageName(selected.name);
+        const selected =
+          matched || (!targetVillageCode && !targetVillageName ? list[0] : undefined);
+        setVillageCode(selected?.code || '');
+        setVillageName(selected?.name || '');
       } else {
-        const defaultCode = `${dCode}.1001`;
-        setVillageCode(defaultCode);
-        setVillageName(targetVillageName || 'Kelurahan');
+        setVillageCode('');
+        setVillageName('');
       }
     } catch (err) {
-      console.error('Gagal memuat kelurahan:', err);
+      setOriginVillages([]);
+      setVillageCode('');
+      setVillageName('');
+      setErrors((previous) => ({
+        ...previous,
+        general: [
+          err instanceof Error ? err.message : 'Gagal memuat daftar kelurahan dari server.',
+        ],
+      }));
     } finally {
       setLoadingVillages(false);
     }
@@ -145,19 +161,39 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
     try {
       // 1. Fetch Sudins from API
       const sudinsRes = await api.getSudinsAsync();
-      const loadedSudins = sudinsRes.data || [];
+      if (sudinsRes.status !== 200 || !Array.isArray(sudinsRes.data)) {
+        throw new Error(sudinsRes.message || 'Gagal memuat daftar Sudin dari server.');
+      }
+      const loadedSudins = sudinsRes.data;
       setSudins(loadedSudins);
 
       // 2. Fetch Subjects from API
       const subjectsRes = await api.getSubjectsAsync();
-      const loadedSubjects = subjectsRes.data || [];
-      setSubjects(loadedSubjects);
+      if (subjectsRes.status === 200 && Array.isArray(subjectsRes.data)) {
+        setSubjects(subjectsRes.data);
+        if (subjectsRes.data.length === 0) {
+          setErrors({
+            subjects: ['API Laravel tidak menyediakan data mata pelajaran untuk akun ini.'],
+          });
+        }
+      } else {
+        setSubjects([]);
+        setErrors({
+          subjects: [
+            subjectsRes.message ||
+              'Daftar mata pelajaran tidak tersedia untuk akun ini melalui API Laravel.',
+          ],
+        });
+      }
 
       // 3. Fetch User's Profile from API (GET /api/profile)
       const profileRes = await api.getProfileAsync();
+      if (profileRes.status !== 200) {
+        throw new Error(profileRes.message || 'Gagal memuat profil dari server.');
+      }
       const currentUser = api.getActiveUser();
 
-      if (profileRes.status === 200 && profileRes.data) {
+      if (profileRes.data) {
         const p: any = profileRes.data;
         setExistingProfile(p);
         setStatusNotice({
@@ -171,7 +207,7 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
         setSchoolName(p.school_name || '');
         setSchoolAddress(p.school_address || '');
 
-        const curSudinId = Number(p.sudin_id) || (loadedSudins[0]?.id ?? 1);
+        const curSudinId = Number(p.sudin_id) || (loadedSudins[0]?.id ?? 0);
         setSudinId(curSudinId);
         const curDistrictCode = getDistrictCode(p.district_code || p.district);
         const curVillageCode = p.village_code || '';
@@ -182,7 +218,8 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
         setSubjectId(p.subject_id ? Number(p.subject_id) : '');
 
         const curDestSudinId =
-          Number(p.destination_sudin_id) || (loadedSudins[1]?.id ?? loadedSudins[0]?.id ?? 2);
+          Number(p.destination_sudin_id) ||
+          (loadedSudins[1]?.id ?? loadedSudins[0]?.id ?? 0);
         setDestinationSudinId(curDestSudinId);
         setDestinationPosition(p.destination_position || 'guru_kelas');
 
@@ -227,11 +264,17 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
 
         // Load districts for origin & destination
         const originDistRes = await api.getDistrictsBySudin(curSudinId);
-        const originDists = normalizeDistrictList(originDistRes.data || []);
+        if (originDistRes.status !== 200 || !Array.isArray(originDistRes.data)) {
+          throw new Error(originDistRes.message || 'Gagal memuat kecamatan asal dari server.');
+        }
+        const originDists = normalizeDistrictList(originDistRes.data);
         setOriginDistricts(originDists);
 
         const destDistRes = await api.getDistrictsBySudin(curDestSudinId);
-        setDestinationDistricts(normalizeDistrictList(destDistRes.data || []));
+        if (destDistRes.status !== 200 || !Array.isArray(destDistRes.data)) {
+          throw new Error(destDistRes.message || 'Gagal memuat kecamatan tujuan dari server.');
+        }
+        setDestinationDistricts(normalizeDistrictList(destDistRes.data));
 
         const effectiveDistrictCode = curDistrictCode || originDists[0]?.code || '';
         setDistrictCode(effectiveDistrictCode);
@@ -253,17 +296,23 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
           setName(currentUser.name);
         }
 
-        const initialSudinId = loadedSudins[0]?.id ?? 1;
-        const initialDestSudinId = loadedSudins[1]?.id ?? loadedSudins[0]?.id ?? 2;
+        const initialSudinId = loadedSudins[0]?.id ?? 0;
+        const initialDestSudinId = loadedSudins[1]?.id ?? loadedSudins[0]?.id ?? 0;
         setSudinId(initialSudinId);
         setDestinationSudinId(initialDestSudinId);
 
         const originDistRes = await api.getDistrictsBySudin(initialSudinId);
-        const originDists = normalizeDistrictList(originDistRes.data || []);
+        if (originDistRes.status !== 200 || !Array.isArray(originDistRes.data)) {
+          throw new Error(originDistRes.message || 'Gagal memuat kecamatan asal dari server.');
+        }
+        const originDists = normalizeDistrictList(originDistRes.data);
         setOriginDistricts(originDists);
 
         const destDistRes = await api.getDistrictsBySudin(initialDestSudinId);
-        setDestinationDistricts(normalizeDistrictList(destDistRes.data || []));
+        if (destDistRes.status !== 200 || !Array.isArray(destDistRes.data)) {
+          throw new Error(destDistRes.message || 'Gagal memuat kecamatan tujuan dari server.');
+        }
+        setDestinationDistricts(normalizeDistrictList(destDistRes.data));
 
         if (originDists.length > 0) {
           const firstDistrict = originDists[0];
@@ -271,9 +320,12 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
           await loadVillages(initialSudinId, firstDistrict.code);
         }
       }
-    } catch (err: any) {
-      console.error('Error fetching profile from API:', err);
-      setErrors({ general: [`Gagal memuat profil dari server: ${err.message}`] });
+    } catch (err) {
+      setErrors({
+        general: [
+          err instanceof Error ? err.message : 'Gagal memuat profil dan data form dari server.',
+        ],
+      });
     } finally {
       setLoading(false);
     }
@@ -286,7 +338,11 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
   const handleSudinChange = async (newSudinId: number) => {
     setSudinId(newSudinId);
     const res = await api.getDistrictsBySudin(newSudinId);
-    const dists = normalizeDistrictList(res.data || []);
+    if (res.status !== 200 || !Array.isArray(res.data)) {
+      setErrors({ general: [res.message || 'Gagal memuat kecamatan asal dari server.'] });
+      return;
+    }
+    const dists = normalizeDistrictList(res.data);
     if (dists.length > 0) {
       setOriginDistricts(dists);
       const firstDistrict = dists[0];
@@ -319,8 +375,11 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
     setDestinationSudinId(newSudinId);
     setDestinationDistrictCodes([]); // reset destination districts filter
     const res = await api.getDistrictsBySudin(newSudinId);
-    if (res.data) {
+    if (res.status === 200 && Array.isArray(res.data)) {
       setDestinationDistricts(normalizeDistrictList(res.data));
+    } else {
+      setDestinationDistricts([]);
+      setErrors({ general: [res.message || 'Gagal memuat kecamatan tujuan dari server.'] });
     }
   };
 
@@ -367,13 +426,52 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
 
     const originDistrict = originDistricts.find((d) => d.code === districtCode);
     const selectedVillage = originVillages.find((v) => v.code === villageCode);
+    const validationErrors: Record<string, string[]> = {};
 
-    const resolvedDistrictCode = districtCode || originDistricts[0]?.code || '31.75.07';
-    const resolvedDistrictName = originDistrict?.name || originDistricts[0]?.name || 'Cipayung';
-    const resolvedVillageCode =
-      villageCode || selectedVillage?.code || `${resolvedDistrictCode}.1001`;
-    const resolvedVillageName =
-      villageName || selectedVillage?.name || originDistrict?.name || 'Kelurahan';
+    if (!sudins.some((sudin) => sudin.id === Number(sudinId))) {
+      validationErrors.sudin_id = ['Pilih Sudin asal dari daftar server.'];
+    }
+    if (
+      !sudins.some((sudin) => sudin.id === Number(destinationSudinId)) ||
+      Number(destinationSudinId) === Number(sudinId)
+    ) {
+      validationErrors.destination_sudin_id = ['Pilih Sudin tujuan yang berbeda dari Sudin asal.'];
+    }
+    if (!originDistrict) {
+      validationErrors.district_code = ['Pilih kecamatan asal dari daftar server.'];
+    } else if (!originDistrict.regency_code || !originDistrict.regency_name) {
+      validationErrors.district_code = [
+        'Data kabupaten/kota untuk kecamatan asal tidak lengkap dari server.',
+      ];
+    }
+    if (!selectedVillage) {
+      validationErrors.village_code = ['Pilih kelurahan asal dari daftar server.'];
+    }
+    if (destinationLevels.length === 0) {
+      validationErrors.destination_levels = ['Pilih setidaknya satu jenjang tujuan.'];
+    }
+    if (position === 'guru_mapel' && subjectId === '') {
+      validationErrors.subject_id = ['Pilih mata pelajaran asal.'];
+    }
+    if (position === 'guru_mapel' && subjects.length === 0 && errors.subjects) {
+      validationErrors.subjects = errors.subjects;
+    }
+    if (destinationPosition === 'guru_mapel' && destinationSubjectIds.length === 0) {
+      validationErrors.destination_subject_ids = ['Pilih setidaknya satu mata pelajaran tujuan.'];
+    }
+    if (destinationPosition === 'guru_mapel' && subjects.length === 0 && errors.subjects) {
+      validationErrors.subjects = errors.subjects;
+    }
+
+    if (Object.keys(validationErrors).length > 0) {
+      setSaving(false);
+      setErrors(validationErrors);
+      return;
+    }
+    if (!originDistrict || !selectedVillage) {
+      setSaving(false);
+      return;
+    }
 
     const payload: ProfileInput = {
       name,
@@ -384,19 +482,23 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
       sudin_id: Number(sudinId),
       position,
       level,
-      subject_id: position === 'guru_mapel' ? Number(subjectId) : null,
+      ...(position === 'guru_mapel' && subjectId !== '' ? { subject_id: Number(subjectId) } : {}),
       destination_position: destinationPosition,
       destination_levels: destinationPosition === 'guru_kelas' ? ['SD'] : destinationLevels,
-      destination_subject_ids: destinationPosition === 'guru_mapel' ? destinationSubjectIds : [],
+      ...(destinationPosition === 'guru_mapel' && destinationSubjectIds.length > 0
+        ? { destination_subject_ids: destinationSubjectIds }
+        : {}),
       destination_sudin_id: Number(destinationSudinId),
-      destination_district_codes: destinationDistrictCodes,
+      ...(destinationDistrictCodes.length > 0
+        ? { destination_district_codes: destinationDistrictCodes }
+        : {}),
       province_code: '31',
-      regency_code: originDistrict?.regency_code || '31.75',
-      regency_name: originDistrict?.regency_name || 'Kota Administrasi Jakarta Timur',
-      district_code: resolvedDistrictCode,
-      district_name: resolvedDistrictName,
-      village_code: resolvedVillageCode,
-      village_name: resolvedVillageName,
+      regency_code: originDistrict.regency_code,
+      regency_name: originDistrict.regency_name,
+      district_code: originDistrict.code,
+      district_name: originDistrict.name,
+      village_code: selectedVillage.code,
+      village_name: selectedVillage.name,
     };
 
     const res = await api.saveProfile(payload);
@@ -640,6 +742,7 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
                     ))}
                   </select>
                   {errors.subject_id && <p className="field-error">{errors.subject_id[0]}</p>}
+                  {errors.subjects && <p className="field-error">{errors.subjects[0]}</p>}
                 </div>
               )}
 
@@ -843,6 +946,9 @@ export const ProfileEdit: React.FC<ProfileEditProps> = ({ onSaved }) => {
                   </div>
                   {errors.destination_subject_ids && (
                     <p className="field-error mt-1">{errors.destination_subject_ids[0]}</p>
+                  )}
+                  {errors.subjects && (
+                    <p className="field-error mt-1">{errors.subjects[0]}</p>
                   )}
                 </div>
               )}

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from './services/api';
 import { Header } from './components/Header';
-import { TeacherDirectory } from './components/TeacherDirectory';
 import { DashboardMatches } from './components/DashboardMatches';
 import { ProfileEdit } from './components/ProfileEdit';
 import { AdminPanel } from './components/AdminPanel';
@@ -12,7 +11,7 @@ import { LoginView } from './components/LoginView';
 export default function App() {
   const [currentUser, setCurrentUser] = useState(api.getActiveUser());
   const [currentTab, setCurrentTab] = useState<string>(
-    api.getActiveUser() ? 'directory' : 'login'
+    api.getActiveUser() ? 'matches' : 'login'
   );
 
   useEffect(() => {
@@ -29,7 +28,7 @@ export default function App() {
   }, [currentTab]);
 
   const handleAuthSuccess = () => {
-    setCurrentTab('directory');
+    setCurrentTab('matches');
   };
 
   const handleLogout = () => {
@@ -61,13 +60,6 @@ export default function App() {
           <RegisterView
             onSuccess={handleAuthSuccess}
             onSwitchToLogin={() => setCurrentTab('login')}
-          />
-        )}
-
-        {!isAuthPage && currentTab === 'directory' && (
-          <TeacherDirectory
-            onNavigateToProfile={() => setCurrentTab('profile')}
-            onNavigateToMatches={() => setCurrentTab('matches')}
           />
         )}
 

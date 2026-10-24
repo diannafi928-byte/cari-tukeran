@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { User } from '../types';
 import {
-  Users,
   Compass,
   UserCheck,
   Shield,
@@ -44,7 +43,7 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onSelectTab, onLogou
           {/* Logo & Branding */}
           <div
             className="flex items-center gap-3 cursor-pointer"
-            onClick={() => onSelectTab('directory')}
+            onClick={() => onSelectTab('matches')}
           >
             <div className="w-10 h-10 rounded-xl bg-emerald-700 flex items-center justify-center text-white shadow-md border border-emerald-500/30 shrink-0">
               <svg
@@ -78,27 +77,15 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onSelectTab, onLogou
           {/* Navigation Links */}
           <nav className="hidden md:flex items-center gap-1 text-sm font-medium">
             <button
-              onClick={() => onSelectTab('directory')}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-md transition ${
-                currentTab === 'directory'
-                  ? 'bg-slate-800 text-emerald-400 font-semibold'
-                  : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
-              }`}
-            >
-              <Users className="w-4 h-4" />
-              <span>Daftar Guru</span>
-            </button>
-
-            <button
               onClick={() => onSelectTab('matches')}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-md transition relative ${
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-md transition ${
                 currentTab === 'matches'
                   ? 'bg-slate-800 text-emerald-400 font-semibold'
                   : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
               }`}
             >
               <Compass className="w-4 h-4" />
-              <span>Kecocokan Saya</span>
+              <span>Cari Tukeran</span>
             </button>
 
             <button
@@ -194,22 +181,13 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onSelectTab, onLogou
       {/* Mobile Navigation bar */}
       <div className="md:hidden flex items-center justify-around bg-slate-950 border-t border-slate-800 py-2 px-1 text-xs">
         <button
-          onClick={() => onSelectTab('directory')}
-          className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded ${
-            currentTab === 'directory' ? 'text-emerald-400 font-bold' : 'text-slate-400'
-          }`}
-        >
-          <Users className="w-4 h-4" />
-          <span>Daftar</span>
-        </button>
-        <button
           onClick={() => onSelectTab('matches')}
           className={`flex flex-col items-center gap-0.5 py-1 px-2 rounded ${
             currentTab === 'matches' ? 'text-emerald-400 font-bold' : 'text-slate-400'
           }`}
         >
           <Compass className="w-4 h-4" />
-          <span>Kecocokan</span>
+          <span>Cari Tukeran</span>
         </button>
         <button
           onClick={() => onSelectTab('profile')}

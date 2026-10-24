@@ -23,6 +23,8 @@ interface DashboardMatchesProps {
 export const DashboardMatches: React.FC<DashboardMatchesProps> = ({ onNavigateToProfile }) => {
   const [profile, setProfile] = useState<TeacherProfile | null>(null);
   const [matches, setMatches] = useState<TwoWayMatch[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [districtFilter, setDistrictFilter] = useState('');
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [isRequestingDeletion, setIsRequestingDeletion] = useState(false);
@@ -31,14 +33,31 @@ export const DashboardMatches: React.FC<DashboardMatchesProps> = ({ onNavigateTo
   );
 
   const loadData = async () => {
-    const profRes = await api.getProfileAsync();
-    setProfile(profRes.data || null);
+    setLoading(true);
+    setLoadError('');
+    try {
+      const profRes = await api.getProfileAsync();
+      if (profRes.status !== 200) {
+        throw new Error(profRes.message || 'Gagal memuat profil dari server.');
+      }
+      setProfile(profRes.data || null);
 
-    if (profRes.data) {
-      const matchRes = await api.getMatchesAsync(districtFilter || undefined);
-      setMatches(matchRes.data || []);
-    } else {
+      if (profRes.data) {
+        const matchRes = await api.getMatchesAsync(districtFilter || undefined);
+        if (matchRes.status !== 200 || !Array.isArray(matchRes.data)) {
+          throw new Error(matchRes.message || 'Gagal mencari kecocokan dari server.');
+        }
+        setMatches(matchRes.data);
+      } else {
+        setMatches([]);
+      }
+    } catch (err) {
       setMatches([]);
+      setLoadError(
+        err instanceof Error ? err.message : 'Gagal memuat data kecocokan dari server.'
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -47,6 +66,16 @@ export const DashboardMatches: React.FC<DashboardMatchesProps> = ({ onNavigateTo
     const unsub = api.subscribe(loadData);
     return unsub;
   }, [districtFilter]);
+
+  if (loading) {
+    return (
+      <div className="page-shell">
+        <main className="dashboard-main py-20 text-center">
+          <p className="text-sm text-slate-500">Memuat kecocokan dari server...</p>
+        </main>
+      </div>
+    );
+  }
 
   const handleToggleMutationStatus = async () => {
     if (!profile) return;
@@ -102,25 +131,36 @@ export const DashboardMatches: React.FC<DashboardMatchesProps> = ({ onNavigateTo
       <div className="page-shell">
         <main className="dashboard-main">
           <section className="admin-intro">
-            <p className="eyebrow">KECOCOKAN SAYA</p>
+            <p className="eyebrow">CARI TUKERAN</p>
             <h1>Calon Tukeran Dua Arah</h1>
             <p>Temukan rekan guru yang saling membutuhkan penempatan di sekolah dan Sudin Anda.</p>
           </section>
 
           <section className="panel admin-users-panel">
             <div className="empty-state">
-              <span className="empty-symbol">⌁</span>
-              <p>
-                Lengkapi{' '}
-                <button
-                  type="button"
-                  onClick={onNavigateToProfile}
-                  className="font-bold text-sky-600 underline hover:text-sky-800"
-                >
-                  profil mutasi
-                </button>{' '}
-                terlebih dahulu agar sistem dapat menghitung kecocokan dua arah.
-              </p>
+              {loadError ? (
+                <div className="space-y-3">
+                  <p className="text-rose-700">{loadError}</p>
+                  <button type="button" onClick={loadData} className="button button-secondary text-xs">
+                    Coba lagi
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <span className="empty-symbol">⌁</span>
+                  <p>
+                    Lengkapi{' '}
+                    <button
+                      type="button"
+                      onClick={onNavigateToProfile}
+                      className="font-bold text-sky-600 underline hover:text-sky-800"
+                    >
+                      profil mutasi
+                    </button>{' '}
+                    terlebih dahulu agar sistem dapat menghitung kecocokan dua arah.
+                  </p>
+                </>
+              )}
             </div>
           </section>
         </main>
@@ -324,9 +364,7 @@ export const DashboardMatches: React.FC<DashboardMatchesProps> = ({ onNavigateTo
               </h3>
               <p className="text-sm text-slate-500 mb-4">
                 Sistem terus memindai saat guru lain mendaftarkan profil mereka. Anda juga dapat
-                melihat{' '}
-                <span className="font-semibold text-slate-700">Daftar Guru</span> untuk melihat
-                semua guru dengan jabatan yang sama.
+                memperbarui preferensi profil agar hasil pencarian sesuai dengan kebutuhan mutasi Anda.
               </p>
               {districtFilter && (
                 <button
@@ -358,11 +396,11 @@ export const DashboardMatches: React.FC<DashboardMatchesProps> = ({ onNavigateTo
                     <div className="flex items-center gap-2">
                       <Sparkles className="w-4 h-4 text-amber-300" />
                       <span className="font-bold text-sm tracking-wide">
-                        Kecocokan Dua Arah Sempurna (100% Match)
+                        Kecocokan Dua Arah
                       </span>
                     </div>
                     <span className="text-xs bg-white/20 backdrop-blur px-2.5 py-0.5 rounded-full font-medium">
-                      {match.matchReason}
+                      {match.matchReason || 'Sudin, jabatan, jenjang, mapel, dan wilayah sesuai'}
                     </span>
                   </div>
 
