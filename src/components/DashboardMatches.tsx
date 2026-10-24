@@ -235,7 +235,9 @@ export const DashboardMatches: React.FC<DashboardMatchesProps> = ({ onNavigateTo
               <div className="flex justify-between">
                 <span className="text-slate-500">Sudin Tujuan:</span>
                 <span className="font-semibold text-sky-700">
-                  {profile.destinationSudin?.abbreviation || 'Sudin Tujuan'}
+                  {profile.destinationSudin?.abbreviation ||
+                    profile.destinationSudin?.name ||
+                    `Sudin #${profile.destination_sudin_id}`}
                 </span>
               </div>
             </div>
